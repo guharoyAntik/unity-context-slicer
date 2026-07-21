@@ -1,5 +1,9 @@
 # Unity Context Slicer
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![MCP Standard](https://img.shields.io/badge/MCP-1.0-green.svg)](https://modelcontextprotocol.io)
+
 **Unity Context Slicer** is a graph-based context extraction engine and Model Context Protocol (MCP) server designed for Unity projects. It parses C# scripts, Unity scenes (`.unity`), prefabs (`.prefab`), and `.meta` asset GUIDs into an in-memory knowledge graph. By slicing targeted $N$-hop neighborhoods around relevant components and compressing raw YAML/AST structures, it delivers **5–10× token reduction**, producing compact context bundles optimized for local and cloud LLMs.
 
 ---
@@ -10,7 +14,7 @@
 * **⚡ 5–10× Context Compression**: Converts verbose scene YAML and code structures into dense, high-information text representations suited for restricted LLM context windows (e.g., 7B local models).
 * **🎯 Focused Slicing**: Extracts $N$-hop relational neighborhoods (`unity_slice`) or comprehensive class context cards (`unity_class`) including method callers, attached scene objects, and inheritance hierarchies.
 * **🔄 Auto-Reloading Resident Session**: Monitors file modification times (`mtime`) across `.cs`, `.unity`, and `.prefab` files to update the resident graph in milliseconds upon code changes.
-* **🔌 Built-in MCP Server**: Exposes stdio-based MCP tools for direct integration with MCP clients such as Claude Desktop, Cursor, or custom AI agents.
+* **🔌 Built-in MCP Server**: Exposes stdio-based MCP tools for direct integration with MCP clients such as Cursor, Windsurf, Claude Desktop, VS Code (Cline / Roo Code), and custom AI agents.
 * **🆔 Unity GUID Resolution**: Resolves `.meta` file GUIDs to bridge C# MonoBehaviours with serialized scene/prefab component references.
 
 ---
@@ -50,6 +54,83 @@ graph TD
 
 ---
 
+## 🤖 Integration Guide for Popular Coding Agents
+
+### 1. **Cursor**
+Navigate to **Cursor Settings** $\rightarrow$ **Features** $\rightarrow$ **MCP Servers** and click **+ Add New MCP Server**:
+* **Name:** `unity-context-slicer`
+* **Type:** `command`
+* **Command:** `python -m unity_context_slicer.mcp_server --project-dir "${workspaceFolder}"`
+
+### 2. **Claude Desktop**
+Add to your `claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "unity-context-slicer": {
+      "command": "python",
+      "args": [
+        "-m",
+        "unity_context_slicer.mcp_server",
+        "--project-dir",
+        "C:/Path/To/Your/UnityProject"
+      ]
+    }
+  }
+}
+```
+
+### 3. **Windsurf (Codeium)**
+Add to `~/.codeium/windsurf/mcp_config.json`:
+```json
+{
+  "mcpServers": {
+    "unity-context-slicer": {
+      "command": "python",
+      "args": [
+        "-m",
+        "unity_context_slicer.mcp_server",
+        "--project-dir",
+        "${workspaceFolder}"
+      ]
+    }
+  }
+}
+```
+
+### 4. **VS Code Extensions (Cline / Roo Code / Continue.dev)**
+Add to your extension's MCP server configuration JSON:
+```json
+{
+  "mcpServers": {
+    "unity-context-slicer": {
+      "command": "python",
+      "args": [
+        "-m",
+        "unity_context_slicer.mcp_server",
+        "--project-dir",
+        "${workspaceFolder}"
+      ]
+    }
+  }
+}
+```
+
+---
+
+## 💡 Recommended Agent Rules (`.cursorrules` / `.windsurfrules`)
+
+To help AI coding agents use Unity Context Slicer effectively, add this instruction to your project's rule file:
+
+```markdown
+When answering questions or writing C#/Unity code:
+1. Use `unity_search` to discover relevant classes, methods, or scene GameObjects.
+2. Use `unity_class` to inspect MonoBehaviour callers, attached scene objects, and class inheritance.
+3. Use `unity_bundle` before initiating large refactors to receive a compressed graph context bundle.
+```
+
+---
+
 ## 📁 Repository Structure
 
 * [unity_context_slicer/](file:///d:/MyGames/UnitySkill/unity_context_slicer)
@@ -66,14 +147,25 @@ graph TD
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Installation & Quick Start
+
+### Installation via Pip / Editable Install
+```bash
+pip install -e .
+```
 
 ### Running the MCP Server
 ```bash
-python -m unity_context_slicer.mcp_server --project-dir "path/to/UnityProject"
+unity-context-slicer --project-dir "path/to/UnityProject"
 ```
 
 ### Testing with MCP Inspector
 ```bash
-npx -y @modelcontextprotocol/inspector python -m unity_context_slicer.mcp_server --project-dir "path/to/UnityProject"
+npx -y @modelcontextprotocol/inspector unity-context-slicer --project-dir "path/to/UnityProject"
 ```
+
+---
+
+## 📜 License
+
+This project is licensed under the [MIT License](file:///d:/MyGames/UnitySkill/LICENSE).

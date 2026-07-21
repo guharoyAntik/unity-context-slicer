@@ -1,0 +1,44 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "unity-context-slicer"
+version = "0.1.0"
+description = "Graph-based context extraction engine & MCP server for Unity projects"
+readme = "README.md"
+authors = [
+    { name = "Unity Context Slicer Developers" }
+]
+license = "MIT"
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Software Development :: Code Generators",
+]
+dependencies = [
+    "mcp>=1.0.0",
+    "pyyaml>=6.0",
+]
+
+[project.scripts]
+unity-context-slicer = "unity_context_slicer.mcp_server:run"
+
+[project.urls]
+Homepage = "https://github.com/petitioner0/unity-context-slicer"
+Repository = "https://github.com/petitioner0/unity-context-slicer"
+Issues = "https://github.com/petitioner0/unity-context-slicer/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["unity_context_slicer*"]
+
+[tool.setuptools.package-data]
+unity_context_slicer = ["csharp_scanner/*.cs", "csharp_scanner/*.csproj"]

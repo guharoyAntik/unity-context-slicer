@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# C# / .NET
+**/bin/
+**/obj/
+.vs/
+*.user
+*.userosv
+*.suo
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

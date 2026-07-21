@@ -1,0 +1,5 @@
+include README.md
+include LICENSE
+recursive-include unity_context_slicer/csharp_scanner *.cs *.csproj
+prune unity_context_slicer/csharp_scanner/bin
+prune unity_context_slicer/csharp_scanner/obj
