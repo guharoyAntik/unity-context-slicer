@@ -1,10 +1,28 @@
 # Unity Context Slicer
 
+[![PyPI version](https://badge.fury.io/py/unity-context-slicer.svg)](https://badge.fury.io/py/unity-context-slicer)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![MCP Standard](https://img.shields.io/badge/MCP-1.0-green.svg)](https://modelcontextprotocol.io)
 
 **Unity Context Slicer** is a graph-based context extraction engine and Model Context Protocol (MCP) server designed for Unity projects. It parses C# scripts, Unity scenes (`.unity`), prefabs (`.prefab`), and `.meta` asset GUIDs into an in-memory knowledge graph. By slicing targeted $N$-hop neighborhoods around relevant components and compressing raw YAML/AST structures, it delivers **5–10× token reduction**, producing compact context bundles optimized for local and cloud LLMs.
+
+---
+
+## ⚡ Quick Start (Zero Install)
+
+Run the server directly without installing Python dependencies using `uvx`:
+
+```bash
+uvx unity-context-slicer --project-dir "path/to/YourUnityProject"
+```
+
+Or install via `pip`:
+
+```bash
+pip install unity-context-slicer
+unity-context-slicer --project-dir "path/to/YourUnityProject"
+```
 
 ---
 
@@ -60,7 +78,7 @@ graph TD
 Navigate to **Cursor Settings** $\rightarrow$ **Features** $\rightarrow$ **MCP Servers** and click **+ Add New MCP Server**:
 * **Name:** `unity-context-slicer`
 * **Type:** `command`
-* **Command:** `python -m unity_context_slicer.mcp_server --project-dir "${workspaceFolder}"`
+* **Command:** `uvx unity-context-slicer --project-dir "${workspaceFolder}"`
 
 ### 2. **Claude Desktop**
 Add to your `claude_desktop_config.json`:
@@ -68,10 +86,9 @@ Add to your `claude_desktop_config.json`:
 {
   "mcpServers": {
     "unity-context-slicer": {
-      "command": "python",
+      "command": "uvx",
       "args": [
-        "-m",
-        "unity_context_slicer.mcp_server",
+        "unity-context-slicer",
         "--project-dir",
         "C:/Path/To/Your/UnityProject"
       ]
@@ -86,10 +103,9 @@ Add to `~/.codeium/windsurf/mcp_config.json`:
 {
   "mcpServers": {
     "unity-context-slicer": {
-      "command": "python",
+      "command": "uvx",
       "args": [
-        "-m",
-        "unity_context_slicer.mcp_server",
+        "unity-context-slicer",
         "--project-dir",
         "${workspaceFolder}"
       ]
@@ -104,10 +120,9 @@ Add to your extension's MCP server configuration JSON:
 {
   "mcpServers": {
     "unity-context-slicer": {
-      "command": "python",
+      "command": "uvx",
       "args": [
-        "-m",
-        "unity_context_slicer.mcp_server",
+        "unity-context-slicer",
         "--project-dir",
         "${workspaceFolder}"
       ]
@@ -144,25 +159,6 @@ When answering questions or writing C#/Unity code:
   * [annotations.py](file:///d:/MyGames/unity-context-slicer/unity_context_slicer/annotations.py) — Annotation cache for node purpose metadata.
   * [task_log.py](file:///d:/MyGames/unity-context-slicer/unity_context_slicer/task_log.py) — Task history parser and context embedder.
   * [csharp_scanner/](file:///d:/MyGames/unity-context-slicer/unity_context_slicer/csharp_scanner) — C# Roslyn scanner project ([CSharpScanner.csproj](file:///d:/MyGames/unity-context-slicer/unity_context_slicer/csharp_scanner/CSharpScanner.csproj)).
-
----
-
-## 🚀 Installation & Quick Start
-
-### Installation via Pip / Editable Install
-```bash
-pip install -e .
-```
-
-### Running the MCP Server
-```bash
-unity-context-slicer --project-dir "path/to/UnityProject"
-```
-
-### Testing with MCP Inspector
-```bash
-npx -y @modelcontextprotocol/inspector unity-context-slicer --project-dir "path/to/UnityProject"
-```
 
 ---
 
