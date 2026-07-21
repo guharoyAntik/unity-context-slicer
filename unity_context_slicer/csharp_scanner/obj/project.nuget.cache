@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "gu2lOvtbD34=",
+  "success": true,
+  "projectFilePath": "D:\\MyGames\\UnitySkill\\unity_context_slicer\\csharp_scanner\\CSharpScanner.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Antik\\.nuget\\packages\\microsoft.codeanalysis.analyzers\\5.3.0\\microsoft.codeanalysis.analyzers.5.3.0.nupkg.sha512",
+    "C:\\Users\\Antik\\.nuget\\packages\\microsoft.codeanalysis.common\\5.6.0\\microsoft.codeanalysis.common.5.6.0.nupkg.sha512",
+    "C:\\Users\\Antik\\.nuget\\packages\\microsoft.codeanalysis.csharp\\5.6.0\\microsoft.codeanalysis.csharp.5.6.0.nupkg.sha512"
+  ],
+  "logs": []
+}
