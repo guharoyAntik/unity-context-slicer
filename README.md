@@ -11,9 +11,11 @@
 ## 🔑 Key Features
 
 * **🕸️ Graph-Based Project Indexing**: Maps C# classes, methods, events, Unity GameObjects, MonoBehaviours, scenes, and prefabs into a unified directed graph.
+* **💾 Project-Local Disk Graph Cache**: Caches parsed project graphs to `.unity_context_slicer/graph_cache.json` for near-instant (< 15ms) startup across new chats, automatically invalidating when project files change.
+* **🤖 Automated Agent Rule Provisioning**: Automatically generates and maintains `.cursorrules`, `.windsurfrules`, `.clinerules`, and `.gemini/rules.md` in target Unity projects to ensure AI agents proactively use slicer tools in every chat session.
 * **⚡ 5–10× Context Compression**: Converts verbose scene YAML and code structures into dense, high-information text representations suited for restricted LLM context windows (e.g., 7B local models).
 * **🎯 Focused Slicing**: Extracts $N$-hop relational neighborhoods (`unity_slice`) or comprehensive class context cards (`unity_class`) including method callers, attached scene objects, and inheritance hierarchies.
-* **🔄 Auto-Reloading Resident Session**: Monitors file modification times (`mtime`) across `.cs`, `.unity`, and `.prefab` files to update the resident graph in milliseconds upon code changes.
+* **🔄 Auto-Reloading Resident Session**: Monitors file modification times (`mtime`) across project files to keep the graph up to date.
 * **🔌 Built-in MCP Server**: Exposes stdio-based MCP tools for direct integration with MCP clients such as Cursor, Windsurf, Claude Desktop, VS Code (Cline / Roo Code), and custom AI agents.
 * **🆔 Unity GUID Resolution**: Resolves `.meta` file GUIDs to bridge C# MonoBehaviours with serialized scene/prefab component references.
 
@@ -142,6 +144,7 @@ When answering questions or writing C#/Unity code:
   * [unity_parser.py](file:///d:/MyGames/UnitySkill/unity_context_slicer/unity_parser.py) — Scene and prefab document structure extractor.
   * [meta_resolver.py](file:///d:/MyGames/UnitySkill/unity_context_slicer/meta_resolver.py) — Mapping between `.meta` GUIDs and C# source files.
   * [annotations.py](file:///d:/MyGames/UnitySkill/unity_context_slicer/annotations.py) — Annotation cache for node purpose metadata.
+  * [rules.py](file:///d:/MyGames/UnitySkill/unity_context_slicer/rules.py) — Automated rule file generator (.cursorrules, .windsurfrules, .clinerules, .gemini/rules.md).
   * [task_log.py](file:///d:/MyGames/UnitySkill/unity_context_slicer/task_log.py) — Task history parser and context embedder.
   * [csharp_scanner/](file:///d:/MyGames/UnitySkill/unity_context_slicer/csharp_scanner) — C# Roslyn scanner project ([CSharpScanner.csproj](file:///d:/MyGames/UnitySkill/unity_context_slicer/csharp_scanner/CSharpScanner.csproj)).
 
