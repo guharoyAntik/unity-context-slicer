@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "unity-context-slicer"
-version = "0.1.0"
+version = "0.2.0"
 description = "Graph-based context extraction engine & MCP server for Unity projects"
 readme = "README.md"
 authors = [
@@ -32,9 +32,9 @@ dependencies = [
 unity-context-slicer = "unity_context_slicer.mcp_server:run"
 
 [project.urls]
-Homepage = "https://github.com/petitioner0/unity-context-slicer"
-Repository = "https://github.com/petitioner0/unity-context-slicer"
-Issues = "https://github.com/petitioner0/unity-context-slicer/issues"
+Homepage = "https://github.com/guharoyAntik/unity-context-slicer"
+Repository = "https://github.com/guharoyAntik/unity-context-slicer"
+Issues = "https://github.com/guharoyAntik/unity-context-slicer/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]

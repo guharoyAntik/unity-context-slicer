@@ -11,9 +11,18 @@ Exact field names match petitioner0/project-visualizer's ProjectScannerModels.cs
 from __future__ import annotations
 
 import yaml
+import json
+import logging
+import os
 from dataclasses import dataclass, field
 from typing import Optional
 from pathlib import Path
+
+CACHE_DIR_NAME = ".unity_context_slicer"
+CACHE_FILE_NAME = "graph_cache.json"
+
+logger = logging.getLogger("unity_context_slicer")
+
 
 
 # ─── Graph primitives ──────────────────────────────────────────────────────────
@@ -106,7 +115,80 @@ class ProjectGraph:
         }
 
 
+# ─── Graph Cache Persistence ───────────────────────────────────────────────────
+
+def get_cache_path(project_dir: str | Path) -> Path:
+    """Return absolute path to the project graph cache file."""
+    return Path(project_dir) / CACHE_DIR_NAME / CACHE_FILE_NAME
+
+
+def save_graph_cache(project_dir: str | Path, graph: ProjectGraph, mtime: float) -> Path:
+    """Save graph and metadata to project-local cache JSON safely."""
+    cache_path = get_cache_path(project_dir)
+    cache_path.parent.mkdir(parents=True, exist_ok=True)
+    temp_path = cache_path.with_suffix(".tmp")
+
+    nodes_data = [
+        {
+            "node_id": n.node_id,
+            "node_type": n.node_type,
+            "name": n.name,
+            "metadata": n.metadata,
+        }
+        for n in graph.nodes.values()
+    ]
+    edges_data = [
+        {
+            "from_id": e.from_id,
+            "to_id": e.to_id,
+            "edge_type": e.edge_type,
+            "metadata": e.metadata,
+        }
+        for e in graph.edges
+    ]
+    data = {
+        "mtime": mtime,
+        "nodes": nodes_data,
+        "edges": edges_data,
+    }
+    with open(temp_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False)
+    temp_path.replace(cache_path)
+    return cache_path
+
+
+def load_graph_cache(project_dir: str | Path) -> tuple[Optional[ProjectGraph], float]:
+    """Load graph and metadata from project-local cache JSON if available."""
+    cache_path = get_cache_path(project_dir)
+    if not cache_path.exists():
+        return None, 0.0
+    try:
+        with open(cache_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        mtime = float(data.get("mtime", 0.0))
+        graph = ProjectGraph()
+        for n_dict in data.get("nodes", []):
+            graph.add_node(GraphNode(
+                node_id=n_dict["node_id"],
+                node_type=n_dict["node_type"],
+                name=n_dict["name"],
+                metadata=n_dict.get("metadata", {}),
+            ))
+        for e_dict in data.get("edges", []):
+            graph.add_edge(GraphEdge(
+                from_id=e_dict["from_id"],
+                to_id=e_dict["to_id"],
+                edge_type=e_dict["edge_type"],
+                metadata=e_dict.get("metadata", {}),
+            ))
+        return graph, mtime
+    except Exception as e:
+        logger.warning(f"Failed to load graph cache from {cache_path}: {e}")
+        return None, 0.0
+
+
 # ─── YAML → Graph loader ───────────────────────────────────────────────────────
+
 
 import subprocess
 import json

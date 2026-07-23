@@ -273,7 +273,7 @@ def unity_stats() -> str:
 
     lines = [
         f"Graph: {session_status['project_dir']}",
-        f"Loaded in: {session_status['load_time_ms']:.0f}ms",
+        f"Loaded in: {session_status['load_time_ms']:.0f}ms (from cache: {'yes' if session_status.get('loaded_from_cache') else 'no'})",
         f"Stale: {'YES — will reload on next query' if session_status['is_stale'] else 'no'}",
         "",
         f"Total nodes: {stats['total_nodes']}",

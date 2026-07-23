@@ -14,18 +14,25 @@ import time
 from pathlib import Path
 from typing import Optional
 
-from .loader import ProjectGraph, load_project_graph
+from .loader import (
+    ProjectGraph,
+    load_project_graph,
+    load_graph_cache,
+    save_graph_cache,
+    CACHE_FILE_NAME,
+)
+from .rules import ensure_agent_rules
 
 logger = logging.getLogger("unity_context_slicer")
 
 
 class GraphSession:
     """
-    Persistent, auto-reloading graph session.
+    Persistent, auto-reloading graph session with disk-based caching.
 
     Usage:
         session = GraphSession("D:/MyProject")
-        graph = session.get_graph()  # loads on first call, reloads if files changed
+        graph = session.get_graph()  # loads from cache if valid, reloads if files changed
     """
 
     def __init__(self, project_dir: str | Path):
@@ -33,6 +40,10 @@ class GraphSession:
         self._graph: Optional[ProjectGraph] = None
         self._loaded_mtime: float = 0.0
         self._load_time_ms: float = 0.0
+        self._loaded_from_cache: bool = False
+
+        # Automatically ensure agent rule files exist for all major AI tools
+        ensure_agent_rules(self.project_dir)
 
     @property
     def is_loaded(self) -> bool:
@@ -47,7 +58,7 @@ class GraphSession:
         extensions = ('.cs', '.unity', '.prefab', '.meta')
         for root, dirs, files in os.walk(self.project_dir):
             rel_path = os.path.relpath(root, self.project_dir).replace('\\', '/')
-            if rel_path.startswith(('Library', 'Temp', 'Logs', 'Obj', 'Builds', '.git')):
+            if rel_path.startswith(('Library', 'Temp', 'Logs', 'Obj', 'Builds', '.git', '.unity_context_slicer')):
                 dirs.clear() # don't recurse
                 continue
                 
@@ -74,30 +85,51 @@ class GraphSession:
             self._reload()
         return self._graph
 
-    def _reload(self):
-        """Force-reload the graph from disk."""
+    def _reload(self, force_rescan: bool = False):
+        """Reload the graph from disk cache or rescan project."""
         if not self.project_dir.exists():
             raise FileNotFoundError(
                 f"Project directory not found at: {self.project_dir}"
             )
 
         start = time.monotonic()
+        latest_mtime = self._get_latest_mtime()
+
+        if not force_rescan:
+            cached_graph, cached_mtime = load_graph_cache(self.project_dir)
+            if cached_graph is not None and cached_mtime >= latest_mtime:
+                self._graph = cached_graph
+                self._loaded_mtime = cached_mtime
+                self._load_time_ms = (time.monotonic() - start) * 1000
+                self._loaded_from_cache = True
+
+                stats = self._graph.stats()
+                logger.info(
+                    f"Graph loaded from disk cache ({CACHE_FILE_NAME}): {stats['total_nodes']} nodes, "
+                    f"{stats['total_edges']} edges in {self._load_time_ms:.0f}ms"
+                )
+                return
+
+        # Full rescan
         self._graph = load_project_graph(self.project_dir)
-        self._loaded_mtime = self._get_latest_mtime()
+        self._loaded_mtime = latest_mtime
+        save_graph_cache(self.project_dir, self._graph, self._loaded_mtime)
         self._load_time_ms = (time.monotonic() - start) * 1000
+        self._loaded_from_cache = False
 
         stats = self._graph.stats()
         logger.info(
-            f"Graph loaded: {stats['total_nodes']} nodes, {stats['total_edges']} edges "
+            f"Graph scanned & cached: {stats['total_nodes']} nodes, {stats['total_edges']} edges "
             f"in {self._load_time_ms:.0f}ms from {self.project_dir}"
         )
 
     def force_reload(self) -> dict:
         """Explicitly reload (exposed as an MCP tool)."""
-        self._reload()
+        self._reload(force_rescan=True)
         stats = self._graph.stats()
         return {
             "status": "reloaded",
+            "loaded_from_cache": self._loaded_from_cache,
             "load_time_ms": round(self._load_time_ms, 1),
             **stats,
         }
@@ -108,7 +140,9 @@ class GraphSession:
             "project_dir": str(self.project_dir),
             "is_loaded": self.is_loaded,
             "is_stale": self.is_stale,
+            "loaded_from_cache": self._loaded_from_cache,
             "loaded_mtime": self._loaded_mtime,
             "load_time_ms": round(self._load_time_ms, 1),
             "stats": self._graph.stats() if self._graph else None,
         }
+
